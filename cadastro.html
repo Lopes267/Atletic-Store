@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criar Conta | Atletic Store</title>
+<link href="style.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  .register-page {
+    min-height: calc(100vh - 180px);
+    display: flex; align-items: flex-start; justify-content: center;
+    background: var(--light-gray); padding: 48px 24px;
+  }
+  .auth-card {
+    background: var(--white); border: 1.5px solid var(--black);
+    width: 100%; max-width: 500px; box-shadow: 6px 6px 0 var(--black);
+  }
+
+  /* ── Role picker (topo do card) ── */
+  .role-picker {
+    padding: 28px 32px 24px;
+    border-bottom: 2px solid var(--black);
+    background: var(--black);
+  }
+  .role-picker-label {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,.45); margin-bottom: 16px;
+  }
+  .role-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .role-opt {
+    border: 2px solid rgba(255,255,255,.18);
+    padding: 22px 16px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    user-select: none; background: transparent;
+  }
+  .role-opt:hover { border-color: rgba(255,255,255,.55); }
+  .role-opt.active {
+    border-color: var(--red);
+    background: rgba(212,43,43,.12);
+    box-shadow: 3px 3px 0 var(--red);
+  }
+  .role-opt-icon { font-size: 36px; margin-bottom: 10px; line-height: 1; }
+  .role-opt-name {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700;
+    letter-spacing: 0.06em; color: white;
+  }
+  .role-opt-desc { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 5px; }
+
+  /* ── Formulário ── */
+  .auth-body { padding: 28px 32px 32px; }
+
+  .auth-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 34px;
+    letter-spacing: 0.02em; line-height: 1; margin-bottom: 6px;
+  }
+  .auth-title span { color: var(--red); }
+  .auth-sub { font-size: 13px; color: var(--gray); margin-bottom: 24px; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--black); margin-bottom: 7px;
+  }
+  .form-group input {
+    width: 100%; height: 46px; border: 1.5px solid var(--border);
+    padding: 0 14px; font-family: 'Barlow', sans-serif; font-size: 14px;
+    color: var(--black); background: var(--white); outline: none;
+    transition: border-color 0.2s; border-radius: 0; -webkit-appearance: none;
+  }
+  .form-group input:focus { border-color: var(--black); }
+  .form-group input.has-error { border-color: var(--red); }
+
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 46px; }
+  .pw-toggle {
+    position: absolute; right: 0; top: 0; height: 46px; width: 46px;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gray); transition: color 0.2s;
+  }
+  .pw-toggle:hover { color: var(--black); }
+
+  .field-err { font-size: 11px; color: var(--red); margin-top: 5px; display: none; }
+
+  .auth-alert {
+    padding: 12px 14px; font-size: 13px; font-weight: 500;
+    margin-bottom: 20px; display: none; border-left: 3px solid;
+  }
+  .auth-alert.error   { background: #fff0f0; border-color: var(--red); color: var(--red); }
+  .auth-alert.success { background: #f0fff5; border-color: #1a7a3a; color: #1a7a3a; }
+
+  .store-field {
+    overflow: hidden; max-height: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+    opacity: 0;
+  }
+  .store-field.visible { max-height: 100px; opacity: 1; }
+
+  .auth-submit {
+    width: 100%; height: 52px; background: var(--black); color: var(--white);
+    border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 16px;
+    font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; margin-top: 8px;
+  }
+  .auth-submit:hover   { background: var(--red); }
+  .auth-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+  .auth-hint {
+    font-size: 13px; color: var(--gray); text-align: center; margin-top: 20px;
+  }
+  .auth-hint a { color: var(--red); font-weight: 700; text-decoration: none; }
+  .auth-hint a:hover { text-decoration: underline; }
+
+  @media (max-width: 520px) {
+    .role-picker, .auth-body { padding-left: 20px; padding-right: 20px; }
+    .auth-card { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">🔒 Acesso seguro — Seus dados são protegidos</div>
+
+<header>
+  <div class="header-inner" style="grid-template-columns:1fr;justify-items:center;">
+    <a class="logo" href="atletic-store.html" style="align-items:center;">
+      <span class="logo-main">Atletic Store</span>
+      <span class="logo-sub" style="text-align:center;">Performance &amp; Estilo</span>
+    </a>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-link" href="atletic-store.html">Início</a>
+    <a class="nav-link" href="futebol.html">Futebol</a>
+    <a class="nav-link" href="basquete.html">Basquete</a>
+    <a class="nav-link" href="volei.html">Vôlei</a>
+  </div>
+</nav>
+
+<div class="register-page">
+  <div class="auth-card">
+
+    <!-- ── SELETOR DE PERFIL ── -->
+    <div class="role-picker">
+      <div class="role-picker-label">Como você quer usar a Atletic Store?</div>
+      <div class="role-grid">
+        <div class="role-opt active" data-role="cliente" onclick="selectRole(this)">
+          <div class="role-opt-icon">👤</div>
+          <div class="role-opt-name">Cliente</div>
+          <div class="role-opt-desc">Quero comprar produtos</div>
+        </div>
+        <div class="role-opt" data-role="vendedor" onclick="selectRole(this)">
+          <div class="role-opt-icon">🏪</div>
+          <div class="role-opt-name">Vendedor</div>
+          <div class="role-opt-desc">Quero vender produtos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FORMULÁRIO ── -->
+    <div class="auth-body">
+
+      <div class="auth-title">Crie sua <span id="titleRole">conta</span></div>
+      <div class="auth-sub" id="formSub">Preencha os dados abaixo para começar</div>
+
+      <div class="auth-alert" id="register-alert"></div>
+
+      <form id="form-register" onsubmit="handleRegister(event)" novalidate>
+
+        <div class="form-group">
+          <label for="reg-name">Nome completo</label>
+          <input type="text" id="reg-name" placeholder="João Silva" autocomplete="name">
+          <div class="field-err" id="err-reg-name"></div>
+        </div>
+
+        <div class="store-field" id="store-field">
+          <div class="form-group">
+            <label for="reg-store">Nome da Loja</label>
+            <input type="text" id="reg-store" placeholder="Ex: Esportes do João" autocomplete="organization">
+            <div class="field-err" id="err-reg-store"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">E-mail</label>
+          <input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email">
+          <div class="field-err" id="err-reg-email"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-pw">Senha</label>
+          <div class="pw-wrap">
+            <input type="password" id="reg-pw" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePw('reg-pw', this)" tabindex="-1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field-err" id="err-reg-pw"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-confirm">Confirmar senha</label>
+          <div class="pw-wrap">
+            <input type="password" id="reg-confirm" placeholder="Repita a senha" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePw('reg-confirm', this)" tabindex="-1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field-err" id="err-reg-confirm"></div>
+        </div>
+
+        <button type="submit" class="auth-submit" id="btn-register">Criar Conta</button>
+      </form>
+
+      <div class="auth-hint">Já tem conta? <a href="login.html">Entrar</a></div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <span>© 2026 Atletic Store. Todos os direitos reservados.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script>
+if (authIsLoggedIn()) {
+  const _redir = sessionStorage.getItem('atletic_redirect') || '';
+  sessionStorage.removeItem('atletic_redirect');
+  const _dest = (_redir && !_redir.includes('login.html') && !_redir.includes('cadastro.html'))
+    ? _redir : authDefaultDest(authGetSession());
+  window.location.href = _dest;
+}
+
+let selectedRole = 'cliente';
+
+function selectRole(el) {
+  document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  selectedRole = el.dataset.role;
+
+  const isVendedor = selectedRole === 'vendedor';
+  document.getElementById('store-field').classList.toggle('visible', isVendedor);
+  document.getElementById('titleRole').textContent = isVendedor ? 'sua loja' : 'conta';
+  document.getElementById('formSub').textContent   = isVendedor
+    ? 'Cadastre sua loja e comece a vender'
+    : 'Preencha os dados abaixo para começar';
+  document.getElementById('btn-register').textContent = isVendedor ? 'Criar Loja' : 'Criar Conta';
+}
+
+const EYE_OPEN   = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+const EYE_CLOSED = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.querySelector('svg').innerHTML = show ? EYE_CLOSED : EYE_OPEN;
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = 'auth-alert ' + type; el.style.display = 'block';
+}
+function hideAlert(id) { document.getElementById(id).style.display = 'none'; }
+function fieldErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+  const input = el.previousElementSibling?.querySelector?.('input') || el.previousElementSibling;
+  if (input?.tagName === 'INPUT') input.classList.toggle('has-error', !!msg);
+}
+function clearFieldErr(id) { fieldErr(id, ''); }
+
+async function handleRegister(e) {
+  e.preventDefault();
+  hideAlert('register-alert');
+  ['err-reg-name','err-reg-store','err-reg-email','err-reg-pw','err-reg-confirm'].forEach(clearFieldErr);
+
+  const name      = document.getElementById('reg-name').value.trim();
+  const storeName = document.getElementById('reg-store').value.trim();
+  const email     = document.getElementById('reg-email').value.trim();
+  const password  = document.getElementById('reg-pw').value;
+  const confirm   = document.getElementById('reg-confirm').value;
+  let valid = true;
+
+  if (name.length < 2)                           { fieldErr('err-reg-name',    'Informe seu nome completo.'); valid = false; }
+  if (selectedRole === 'vendedor' && !storeName) { fieldErr('err-reg-store',   'Informe o nome da loja.'); valid = false; }
+  if (!email.includes('@'))                      { fieldErr('err-reg-email',   'Informe um e-mail válido.'); valid = false; }
+  if (password.length < 6)                       { fieldErr('err-reg-pw',      'Mínimo 6 caracteres.'); valid = false; }
+  if (password !== confirm)                      { fieldErr('err-reg-confirm', 'As senhas não coincidem.'); valid = false; }
+  if (!valid) return;
+
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  btn.textContent = 'Criando...';
+
+  const res = await authRegister(name, email, password, selectedRole, storeName);
+
+  btn.disabled = false;
+  btn.textContent = selectedRole === 'vendedor' ? 'Criar Loja' : 'Criar Conta';
+
+  if (res.ok) {
+    const label = selectedRole === 'vendedor' ? 'Loja criada' : 'Conta criada';
+    showAlert('register-alert', `✔ ${label}! Bem-vindo, ${res.user.name.split(' ')[0]}!`, 'success');
+    setTimeout(() => {
+      const dest = sessionStorage.getItem('atletic_redirect') || authDefaultDest(res.user);
+      sessionStorage.removeItem('atletic_redirect');
+      window.location.href = dest;
+    }, 1200);
+  } else {
+    showAlert('register-alert', res.error, 'error');
+  }
+}
+</script>
+<script src="accessibility.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atletic Store</title>
+<link href="style.css" rel="stylesheet">
+<style>
+  /* Ajuste rápido para garantir que as novas imagens fiquem bonitas */
+  .product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Faz a imagem preencher o espaço sem distorcer */
+    display: block;
+  }
+  .product-img {
+    overflow: hidden; /* Garante que a imagem não saia do card */
+    background: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">🚚 Frete grátis para compras acima de R$199 — Use o código ATLETIC10 para 10% off</div>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <span class="logo-main">Atletic Store</span>
+      <span class="logo-sub">Performance &amp; Estilo</span>
+    </a>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Buscar produtos, marcas e categorias..." />
+      <button class="search-btn" onclick="doSearch()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-actions">
+      <button class="cart-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        Carrinho
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-link active" href="#">Início</a>
+    <a class="nav-link" href="futebol.html">Futebol</a>
+    <a class="nav-link" href="basquete.html">Basquete</a>
+    <a class="nav-link" href="volei.html">Vôlei</a>
+    
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Nova Coleção 2026</span>
+    <h1>Equipamentos<br>Para <span>Campeões</span></h1>
+    <p>Tudo que você precisa para dominar o campo, a quadra e a praia. Qualidade profissional com o melhor preço.</p>
+    <a href="#produtos" class="hero-cta">
+      Ver Produtos
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <div class="hero-stats">
+      <div><div class="stat-num">500+</div><div class="stat-label">Produtos</div></div>
+      <div><div class="stat-num">3</div><div class="stat-label">Modalidades</div></div>
+      <div><div class="stat-num">48h</div><div class="stat-label">Entrega</div></div>
+      <div><div class="stat-num">4.9★</div><div class="stat-label">Avaliação</div></div>
+    </div>
+  </div>
+</section>
+
+<div id="produtos" class="section">
+  <div class="section-header">
+    <h2 class="section-title">Nossos <span>Produtos</span></h2>
+    <a href="#" class="view-all">Ver Todos</a>
+  </div>
+
+  <div class="cat-tabs">
+    <button class="cat-tab active" data-cat="todos" onclick="filterCat(this, 'todos')">
+      🏆 Todos
+      <span class="cat-count" id="count-todos">12</span>
+    </button>
+    <button class="cat-tab" data-cat="futebol" onclick="filterCat(this, 'futebol')">
+      ⚽ Futebol
+      <span class="cat-count" id="count-futebol">4</span>
+    </button>
+    <button class="cat-tab" data-cat="basquete" onclick="filterCat(this, 'basquete')">
+      🏀 Basquete
+      <span class="cat-count" id="count-basquete">4</span>
+    </button>
+    <button class="cat-tab" data-cat="volei" onclick="filterCat(this, 'volei')">
+      🏐 Vôlei
+      <span class="cat-count" id="count-volei">4</span>
+    </button>
+  </div>
+
+  <div class="products-grid" id="productsGrid"></div>
+  <div class="no-results" id="noResults" style="display:none;">
+    <div class="no-results-icon">🔍</div>
+    <h3>Nenhum produto encontrado</h3>
+    <p>Tente outro termo de busca ou categoria.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <span>© 2026 Atletic Store. Todos os direitos reservados.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const GLOBAL_PRODUCTS_KEY = 'atleticstore_products';
+let products = [];
+
+function loadProducts() {
+  try { products = JSON.parse(localStorage.getItem(GLOBAL_PRODUCTS_KEY) || '[]'); }
+  catch { products = []; }
+}
+
+let currentCat = 'todos';
+let searchTerm = '';
+
+function renderProducts() {
+  const grid  = document.getElementById('productsGrid');
+  const noRes = document.getElementById('noResults');
+  const term  = searchTerm.toLowerCase();
+
+  const filtered = products.filter(p => {
+    const cat = p.category ? p.category.split('-')[0] : '';
+    const matchCat    = currentCat === 'todos' || cat === currentCat;
+    const matchSearch = !term || p.name.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term);
+    return matchCat && matchSearch;
+  });
+
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    noRes.style.display = 'block';
+    return;
+  }
+  noRes.style.display = 'none';
+
+  const catLabel = { futebol:'Futebol', basquete:'Basquete', volei:'Vôlei' };
+  filtered.forEach((p, idx) => {
+    const cat        = p.category ? p.category.split('-')[0] : '';
+    const badgeHtml  = p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'new' ? 'Novo' : p.badge === 'sale' ? 'Oferta' : 'Hot'}</span>` : '';
+    const oldHtml    = p.old ? `<div class="price-old">${p.old}</div>` : '';
+    const imgHtml    = p.image ? `<img src="${p.image}" alt="${p.name}">` : `<div style="font-size:48px;line-height:1;">🏅</div>`;
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      ${badgeHtml}
+      <div class="product-img">${imgHtml}</div>
+      <div class="product-info">
+        <div class="product-category">${catLabel[cat] || cat}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="product-footer">
+          <div class="product-price">
+            ${oldHtml}
+            <div class="price-main">${p.price}</div>
+          </div>
+          <button class="add-btn" onclick="addToCart('${p.id}')">+ Carrinho</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function updateCounts() {
+  ['futebol','basquete','volei'].forEach(c => {
+    const el = document.getElementById('count-' + c);
+    if (el) el.textContent = products.filter(p => p.category && p.category.startsWith(c + '-')).length;
+  });
+  const todosEl = document.getElementById('count-todos');
+  if (todosEl) todosEl.textContent = products.length;
+}
+
+function filterCat(btn, cat) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = cat;
+  renderProducts();
+}
+
+function addToCart(productId) {
+  addProductToCart(productId);
+  const btn = event.target;
+  btn.textContent = '✓ Adicionado';
+  btn.style.background = '#1a7a3a';
+  setTimeout(() => { btn.textContent = '+ Carrinho'; btn.style.background = ''; }, 1500);
+}
+
+function doSearch() {
+  searchTerm = document.getElementById('searchInput').value;
+  renderProducts();
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchTerm = this.value;
+  renderProducts();
+});
+
+loadProducts();
+updateCounts();
+renderProducts();
+</script>
+<script src="cart.js"></script>
+<script src="auth.js"></script>
+<script src="accessibility.js"></script>
+</body>
+</html>
