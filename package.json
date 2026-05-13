@@ -1,0 +1,12 @@
+{
+  "name": "atletic-store",
+  "version": "1.0.0",
+  "description": "Atletic Store - servidor local",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  }
+}

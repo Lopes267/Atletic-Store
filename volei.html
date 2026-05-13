@@ -137,13 +137,13 @@
 </footer>
 
 <script>
-const GLOBAL_PRODUCTS_KEY = 'atleticstore_products';
 let products = [];
 
-function loadProducts() {
+async function loadProducts() {
   try {
-    const all = JSON.parse(localStorage.getItem(GLOBAL_PRODUCTS_KEY) || '[]');
-    products = all
+    const res = await fetch('/api/products');
+    const all = await res.json();
+    products  = all
       .filter(p => p.category && p.category.startsWith('volei-'))
       .map(p => ({ ...p, subcat: p.category.split('-')[1] }));
   } catch { products = []; }
@@ -232,8 +232,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
   renderProducts();
 });
 
-loadProducts();
-renderProducts();
+loadProducts().then(renderProducts);
 </script>
 <script src="cart.js"></script>
 <script src="auth.js"></script>

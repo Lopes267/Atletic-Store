@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mp3zy526ddyl6x",
+    "name": "Enzo Lopes",
+    "email": "enzopaula05@gmail.com",
+    "password": "$2a$10$.adDPCXF5PdevngzJtx1eu6r8Gc7ze3m9/YXUbmGAtP6ZFfNpGvEu",
+    "role": "cliente",
+    "storeName": "",
+    "createdAt": "2026-05-13T11:49:06.462Z"
+  },
+  {
+    "id": "mp3zysene02ir4",
+    "name": "Lucas Bauman",
+    "email": "teste@gmail.com",
+    "password": "$2a$10$dXTWFIUW6qEj7cOJw/oWPeVU6OqMzdH7MITwfv9dlUWi1pKsyjOI6",
+    "role": "vendedor",
+    "storeName": "Atletico de Madrid",
+    "createdAt": "2026-05-13T11:49:36.719Z"
+  }
+]

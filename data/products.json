@@ -1,0 +1,16 @@
+[
+  {
+    "id": "mp3zzlnidqw3",
+    "name": "Chuteira",
+    "category": "futebol-chuteira",
+    "price": "R$ 209,99",
+    "priceNum": 209.99,
+    "old": "R$ 399,99",
+    "desc": "Chuteira Mercurial",
+    "image": "img/product_mp3zzlnidqw3.jpg",
+    "badge": null,
+    "sellerId": "mp3zysene02ir4",
+    "storeName": "Atletico de Madrid",
+    "createdAt": "2026-05-13T11:50:14.622Z"
+  }
+]

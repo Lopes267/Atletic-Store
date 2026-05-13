@@ -123,16 +123,18 @@
 </footer>
 
 <script>
-const GLOBAL_PRODUCTS_KEY = 'atleticstore_products';
-let products = [];
-
-function loadProducts() {
-  try { products = JSON.parse(localStorage.getItem(GLOBAL_PRODUCTS_KEY) || '[]'); }
-  catch { products = []; }
-}
-
+let products   = [];
 let currentCat = 'todos';
 let searchTerm = '';
+
+async function loadProducts() {
+  try {
+    const res = await fetch('/api/products');
+    products  = await res.json();
+  } catch {
+    products = [];
+  }
+}
 
 function renderProducts() {
   const grid  = document.getElementById('productsGrid');
@@ -140,7 +142,7 @@ function renderProducts() {
   const term  = searchTerm.toLowerCase();
 
   const filtered = products.filter(p => {
-    const cat = p.category ? p.category.split('-')[0] : '';
+    const cat         = p.category ? p.category.split('-')[0] : '';
     const matchCat    = currentCat === 'todos' || cat === currentCat;
     const matchSearch = !term || p.name.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term);
     return matchCat && matchSearch;
@@ -154,15 +156,15 @@ function renderProducts() {
   }
   noRes.style.display = 'none';
 
-  const catLabel = { futebol:'Futebol', basquete:'Basquete', volei:'Vôlei' };
-  filtered.forEach((p, idx) => {
-    const cat        = p.category ? p.category.split('-')[0] : '';
-    const badgeHtml  = p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'new' ? 'Novo' : p.badge === 'sale' ? 'Oferta' : 'Hot'}</span>` : '';
-    const oldHtml    = p.old ? `<div class="price-old">${p.old}</div>` : '';
-    const imgHtml    = p.image ? `<img src="${p.image}" alt="${p.name}">` : `<div style="font-size:48px;line-height:1;">🏅</div>`;
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
+  const catLabel = { futebol: 'Futebol', basquete: 'Basquete', volei: 'Vôlei' };
+  filtered.forEach(p => {
+    const cat       = p.category ? p.category.split('-')[0] : '';
+    const badgeHtml = p.badge ? `<span class="product-badge badge-${p.badge}">${p.badge === 'new' ? 'Novo' : p.badge === 'sale' ? 'Oferta' : 'Hot'}</span>` : '';
+    const oldHtml   = p.old   ? `<div class="price-old">${p.old}</div>` : '';
+    const imgHtml   = p.image ? `<img src="${p.image}" alt="${p.name}">` : `<div style="font-size:48px;line-height:1;">🏅</div>`;
+    const card      = document.createElement('div');
+    card.className  = 'product-card';
+    card.innerHTML  = `
       ${badgeHtml}
       <div class="product-img">${imgHtml}</div>
       <div class="product-info">
@@ -182,7 +184,7 @@ function renderProducts() {
 }
 
 function updateCounts() {
-  ['futebol','basquete','volei'].forEach(c => {
+  ['futebol', 'basquete', 'volei'].forEach(c => {
     const el = document.getElementById('count-' + c);
     if (el) el.textContent = products.filter(p => p.category && p.category.startsWith(c + '-')).length;
   });
@@ -215,9 +217,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
   renderProducts();
 });
 
-loadProducts();
-updateCounts();
-renderProducts();
+loadProducts().then(() => { updateCounts(); renderProducts(); });
 </script>
 <script src="cart.js"></script>
 <script src="auth.js"></script>

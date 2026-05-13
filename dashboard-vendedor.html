@@ -467,20 +467,14 @@ if (!session) {
   window.location.href = 'dashboard-cliente.html';
 }
 
-const GLOBAL_PRODUCTS_KEY = 'atleticstore_products';
-const CONFIG_KEY          = 'atleticstore_seller_config_' + session.id;
+const CONFIG_KEY = 'atleticstore_seller_config_' + session.id;
 
-function getAllProducts()    { try { return JSON.parse(localStorage.getItem(GLOBAL_PRODUCTS_KEY) || '[]'); } catch { return []; } }
-function getMyProducts()    { return getAllProducts().filter(p => p.sellerId === session.id); }
-function saveMyProducts(mine) {
-  const others = getAllProducts().filter(p => p.sellerId !== session.id);
-  localStorage.setItem(GLOBAL_PRODUCTS_KEY, JSON.stringify([...others, ...mine]));
-}
-function getConfig()           { try { return JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}'); } catch { return {}; } }
-function saveConfigData(data)  { localStorage.setItem(CONFIG_KEY, JSON.stringify(data)); }
+function getConfig()          { try { return JSON.parse(localStorage.getItem(CONFIG_KEY) || '{}'); } catch { return {}; } }
+function saveConfigLocal(d)   { localStorage.setItem(CONFIG_KEY, JSON.stringify(d)); }
 
 let selectedImageBase64 = null;
 
+// ── Imagem ──
 function handleImageSelect(input) {
   const file = input.files[0];
   if (!file) return;
@@ -515,26 +509,33 @@ function handleImageSelect(input) {
 function clearImageField() {
   selectedImageBase64 = null;
   const preview = document.getElementById('imgPreview');
-  preview.style.display = 'none';
-  preview.src = '';
+  preview.style.display = 'none'; preview.src = '';
   document.getElementById('imgUploadPlaceholder').style.display = 'block';
   document.getElementById('prod-image-file').value = '';
 }
 
-function initPage() {
-  const config = getConfig();
+// ── Init ──
+async function initPage() {
+  const config    = getConfig();
   const storeName = config.storeName || session.storeName || session.name.split(' ')[0];
-  document.getElementById('heroStoreName').textContent = storeName;
-  document.getElementById('cfgName').textContent  = session.name;
-  document.getElementById('cfgEmail').textContent = session.email;
-  document.getElementById('config-store-name').value = config.storeName || session.storeName || '';
-  document.getElementById('config-phone').value       = config.phone || '';
-  document.getElementById('config-desc').value        = config.desc  || '';
-  renderProducts();
+  document.getElementById('heroStoreName').textContent        = storeName;
+  document.getElementById('cfgName').textContent              = session.name;
+  document.getElementById('cfgEmail').textContent             = session.email;
+  document.getElementById('config-store-name').value          = config.storeName || session.storeName || '';
+  document.getElementById('config-phone').value               = config.phone || '';
+  document.getElementById('config-desc').value                = config.desc  || '';
+  await renderProducts();
 }
 
-function renderProducts() {
-  const products = getMyProducts();
+// ── Produtos (API) ──
+async function fetchMyProducts() {
+  const res  = await fetch('/api/products');
+  const all  = await res.json();
+  return all.filter(p => p.sellerId === session.id);
+}
+
+async function renderProducts() {
+  const products = await fetchMyProducts();
   const emptyEl  = document.getElementById('products-empty');
   const tableEl  = document.getElementById('products-table-wrap');
   const tbody    = document.getElementById('productsTableBody');
@@ -542,8 +543,8 @@ function renderProducts() {
   updateStats(products);
 
   if (products.length === 0) {
-    emptyEl.style.display  = 'block';
-    tableEl.style.display  = 'none';
+    emptyEl.style.display = 'block';
+    tableEl.style.display = 'none';
     return;
   }
   emptyEl.style.display = 'none';
@@ -564,8 +565,9 @@ function renderProducts() {
       ? `<span class="td-badge-pill td-badge-${p.badge}">${badgeLabels[p.badge]}</span>`
       : `<span class="td-badge-none">—</span>`;
     const date = new Date(p.createdAt).toLocaleDateString('pt-BR');
+    const thumb = p.image ? `<img src="${p.image}" style="width:40px;height:40px;object-fit:cover;margin-right:8px;vertical-align:middle;">` : '';
     return `<tr>
-      <td class="td-name">${p.name}</td>
+      <td class="td-name">${thumb}${p.name}</td>
       <td class="td-desc">${p.desc}</td>
       <td>${catLabels[p.category] || p.category}</td>
       <td style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;">${p.price}</td>
@@ -583,17 +585,17 @@ function updateStats(products) {
   document.getElementById('statNovos').textContent    = products.filter(p => p.badge === 'new').length;
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if (!confirm('Excluir este produto?')) return;
-  saveMyProducts(getMyProducts().filter(p => p.id !== id));
-  renderProducts();
+  await fetch(`/api/products/${id}`, { method: 'DELETE' });
+  await renderProducts();
 }
 
 function showAddForm() {
   switchDashTab(document.getElementById('tab-adicionar'), 'adicionar');
 }
 
-function handleAddProduct(e) {
+async function handleAddProduct(e) {
   e.preventDefault();
 
   const name     = document.getElementById('prod-name').value.trim();
@@ -603,16 +605,16 @@ function handleAddProduct(e) {
   const desc     = document.getElementById('prod-desc').value.trim();
   const badge    = document.getElementById('prod-badge').value;
 
-  ['err-prod-name','err-prod-price','err-prod-desc'].forEach(id => {
-    const el = document.getElementById(id);
+  ['err-prod-name','err-prod-price','err-prod-desc'].forEach(eid => {
+    const el = document.getElementById(eid);
     el.style.display = 'none';
     const inp = el.previousElementSibling;
     if (inp) inp.classList.remove('has-error');
   });
 
   let valid = true;
-  function fieldErr(id, msg) {
-    const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block';
+  function fieldErr(eid, msg) {
+    const el = document.getElementById(eid); el.textContent = msg; el.style.display = 'block';
     const inp = el.previousElementSibling; if (inp) inp.classList.add('has-error');
     valid = false;
   }
@@ -626,10 +628,13 @@ function handleAddProduct(e) {
   const oldPrice = oldRaw && +oldRaw > 0 ? parseFloat(oldRaw) : null;
   const fmt      = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
+  const btn = document.getElementById('btn-add-product');
+  btn.disabled    = true;
+  btn.textContent = 'Salvando...';
+
   const product = {
     id:        Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    name,
-    category,
+    name, category,
     price:     fmt(price),
     priceNum:  price,
     old:       oldPrice ? fmt(oldPrice) : null,
@@ -641,42 +646,57 @@ function handleAddProduct(e) {
     createdAt: new Date().toISOString()
   };
 
-  saveMyProducts([...getMyProducts(), product]);
-  renderProducts();
+  try {
+    const res  = await fetch('/api/products', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(product)
+    });
+    const data = await res.json();
 
-  const alertEl = document.getElementById('add-alert');
-  alertEl.textContent = `✔ Produto "${name}" adicionado com sucesso!`;
-  alertEl.className   = 'vf-alert success';
-  alertEl.style.display = 'block';
-  setTimeout(() => { alertEl.style.display = 'none'; }, 3000);
+    const alertEl = document.getElementById('add-alert');
+    alertEl.textContent   = `✔ Produto "${name}" adicionado com sucesso!`;
+    alertEl.className     = 'vf-alert success';
+    alertEl.style.display = 'block';
+    setTimeout(() => { alertEl.style.display = 'none'; }, 3000);
 
-  e.target.reset();
-  clearImageField();
-  switchDashTab(document.getElementById('tab-produtos'), 'produtos');
+    e.target.reset();
+    clearImageField();
+    await renderProducts();
+    switchDashTab(document.getElementById('tab-produtos'), 'produtos');
+  } catch {
+    const alertEl = document.getElementById('add-alert');
+    alertEl.textContent   = 'Erro ao salvar produto. Verifique a conexão com o servidor.';
+    alertEl.className     = 'vf-alert error';
+    alertEl.style.display = 'block';
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Adicionar Produto';
+  }
 }
 
-function saveConfig() {
+async function saveConfig() {
   const storeName = document.getElementById('config-store-name').value.trim();
   const phone     = document.getElementById('config-phone').value.trim();
   const desc      = document.getElementById('config-desc').value.trim();
 
-  saveConfigData({ storeName, phone, desc });
-
+  saveConfigLocal({ storeName, phone, desc });
   if (storeName) document.getElementById('heroStoreName').textContent = storeName;
 
-  const users = JSON.parse(localStorage.getItem('atleticstore_users') || '[]');
-  const idx = users.findIndex(u => u.id === session.id);
-  if (idx > -1 && storeName) {
-    users[idx].storeName = storeName;
-    localStorage.setItem('atleticstore_users', JSON.stringify(users, null, 2));
+  try {
+    await fetch(`/api/users/${session.id}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ storeName })
+    });
     const s = authGetSession();
     s.storeName = storeName;
     localStorage.setItem('atleticstore_session', JSON.stringify(s));
-  }
+  } catch { /* falha silenciosa, config local já salva */ }
 
   const alertEl = document.getElementById('config-alert');
-  alertEl.textContent = '✔ Configurações salvas!';
-  alertEl.className   = 'vf-alert success';
+  alertEl.textContent   = '✔ Configurações salvas!';
+  alertEl.className     = 'vf-alert success';
   alertEl.style.display = 'block';
   setTimeout(() => { alertEl.style.display = 'none'; }, 2500);
 }

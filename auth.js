@@ -1,25 +1,7 @@
-const _DB_KEY      = 'atleticstore_users';
 const _SESSION_KEY = 'atleticstore_session';
-
-function _getUsers() {
-  try { return JSON.parse(localStorage.getItem(_DB_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function _saveUsers(users) {
-  localStorage.setItem(_DB_KEY, JSON.stringify(users, null, 2));
-}
 
 function _setSession(data) {
   localStorage.setItem(_SESSION_KEY, JSON.stringify(data));
-}
-
-async function _hash(password) {
-  const buf = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(password + ':atletic_salt_2026')
-  );
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function _uid() {
@@ -32,33 +14,49 @@ function authDefaultDest(session) {
 }
 
 async function authRegister(name, email, password, role, storeName) {
-  role = role || 'cliente';
+  role      = role || 'cliente';
   storeName = (storeName || '').trim();
-  const users = _getUsers();
-  if (users.some(u => u.email === email.toLowerCase())) {
-    return { ok: false, error: 'E-mail já cadastrado.' };
-  }
+
   const user = {
-    id: _uid(),
-    name: name.trim(),
-    email: email.toLowerCase().trim(),
-    password: await _hash(password),
+    id:        _uid(),
+    name:      name.trim(),
+    email:     email.toLowerCase().trim(),
+    password,
     role,
     storeName,
     createdAt: new Date().toISOString()
   };
-  _saveUsers([...users, user]);
-  _setSession({ id: user.id, name: user.name, email: user.email, role: user.role, storeName: user.storeName });
-  return { ok: true, user: authGetSession() };
+
+  try {
+    const res  = await fetch('/api/users/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(user)
+    });
+    const data = await res.json();
+    if (!data.ok) return data;
+
+    _setSession({ id: user.id, name: user.name, email: user.email, role: user.role, storeName: user.storeName });
+    return { ok: true, user: authGetSession() };
+  } catch {
+    return { ok: false, error: 'Erro de conexão com o servidor.' };
+  }
 }
 
 async function authLogin(email, password) {
-  const users = _getUsers();
-  const user = users.find(u => u.email === email.toLowerCase().trim());
-  if (!user) return { ok: false, error: 'E-mail não encontrado.' };
-  if (user.password !== await _hash(password)) return { ok: false, error: 'Senha incorreta.' };
-  _setSession({ id: user.id, name: user.name, email: user.email, role: user.role || 'cliente', storeName: user.storeName || '' });
-  return { ok: true, user: authGetSession() };
+  try {
+    const res  = await fetch('/api/users/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: email.toLowerCase().trim(), password })
+    });
+    const data = await res.json();
+    if (!data.ok) return data;
+    _setSession(data.user);
+    return { ok: true, user: authGetSession() };
+  } catch {
+    return { ok: false, error: 'Erro de conexão com o servidor.' };
+  }
 }
 
 function authLogout() {
@@ -81,17 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!actions) return;
 
   const session = authGetSession();
-  const wrap = document.createElement('div');
+  const wrap    = document.createElement('div');
   wrap.className = 'auth-wrap';
 
   if (session) {
-    const isVendedor = session.role === 'vendedor';
-    const dashLink   = isVendedor ? 'dashboard-vendedor.html' : 'dashboard-cliente.html';
-    const badgeStyle = isVendedor
-      ? 'background:#3a0808;color:#e87070;'
-      : 'background:#1a3a1a;color:#6dbe6d;';
-    const roleLabel  = isVendedor ? 'Vendedor' : 'Cliente';
-    const dashLabel  = isVendedor ? 'Meu Painel' : 'Minha Conta';
+    const isVendedor  = session.role === 'vendedor';
+    const dashLink    = isVendedor ? 'dashboard-vendedor.html' : 'dashboard-cliente.html';
+    const roleLabel   = isVendedor ? 'Vendedor' : 'Cliente';
+    const dashLabel   = isVendedor ? 'Meu Painel' : 'Minha Conta';
     const displayName = (isVendedor && session.storeName) ? session.storeName : session.name.split(' ')[0];
 
     wrap.innerHTML = `

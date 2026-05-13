@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"f:\\\\Atletic Store\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"f:\\\\Atletic Store\" -Recurse | ForEach-Object { $_.FullName })",
+      "Bash(node -e ' *)",
+      "Bash(node --check server.js)",
+      "Bash(node server.js)",
+      "Bash(Start-Sleep -Seconds 2)",
+      "Bash(Invoke-WebRequest -Uri \"http://localhost:4000/api/products\" -UseBasicParsing)",
+      "Bash(Select-Object -ExpandProperty Content)",
+      "PowerShell(Start-Process -FilePath \"node\" -ArgumentList \"f:\\\\Atletic Store\\\\server.js\" -NoNewWindow -PassThru)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:4000/api/products\" -UseBasicParsing)",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const fs=require\\('fs'\\); fs.writeFileSync\\('f:/Atletic Store/data/users.json','[]','utf8'\\); console.log\\('ok'\\)\")"
+    ]
+  }
+}
