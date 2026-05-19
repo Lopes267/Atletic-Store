@@ -16,5 +16,14 @@
     "role": "vendedor",
     "storeName": "Atletico de Madrid",
     "createdAt": "2026-05-13T11:49:36.719Z"
+  },
+  {
+    "id": "mpckrxoeg83ycn",
+    "name": "Henrique Mantovani",
+    "email": "teste2@gmail.com",
+    "password": "$2a$10$8y8BUdVOed/ApGHWfy1zr.pGqtFUhbm0IPlLgWOKELabn59OWVzJK",
+    "role": "cliente",
+    "storeName": "",
+    "createdAt": "2026-05-19T11:54:18.302Z"
   }
 ]

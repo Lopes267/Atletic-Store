@@ -16,7 +16,9 @@
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
       "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
       "Bash(npm install *)",
-      "Bash(node -e \"const fs=require\\('fs'\\); fs.writeFileSync\\('f:/Atletic Store/data/users.json','[]','utf8'\\); console.log\\('ok'\\)\")"
+      "Bash(node -e \"const fs=require\\('fs'\\); fs.writeFileSync\\('f:/Atletic Store/data/users.json','[]','utf8'\\); console.log\\('ok'\\)\")",
+      "Bash(git -C \"f:/Atletic Store\" status)",
+      "Bash(git -C \"f:/Atletic Store\" ls-files --others --exclude-standard)"
     ]
   }
 }

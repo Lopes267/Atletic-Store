@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Futebol | Atletic Store</title>
 <link href="style.css" rel="stylesheet">
+<script>if(localStorage.getItem('darkMode')==='on')document.documentElement.classList.add('dark');</script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
   .product-img img {
@@ -41,6 +42,7 @@
       </button>
     </div>
     <div class="header-actions">
+      <button class="dark-toggle" id="darkToggle" title="Modo escuro" aria-label="Ativar modo escuro"></button>
       <button class="cart-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
@@ -235,6 +237,7 @@ loadProducts().then(renderProducts);
 </script>
 <script src="cart.js"></script>
 <script src="auth.js"></script>
+<script src="darkmode.js"></script>
 <script src="accessibility.js"></script>
 
 </body>

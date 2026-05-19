@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finalizar Compra | Atletic Store</title>
+<link href="style.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  .checkout-page {
+    min-height: calc(100vh - 180px);
+    background: var(--light-gray);
+    padding: 48px 24px;
+  }
+  .checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+  }
+  .checkout-section {
+    background: var(--white);
+    border: 1.5px solid var(--black);
+    box-shadow: 4px 4px 0 var(--black);
+    padding: 32px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--black);
+    padding-bottom: 12px;
+  }
+  .section-title span { color: var(--red); }
+
+  /* Payment Methods */
+  .payment-methods {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .payment-option {
+    border: 1.5px solid var(--border);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .payment-option:hover {
+    border-color: var(--black);
+    background: #fafafa;
+  }
+  .payment-option.selected {
+    border-color: var(--red);
+    border-width: 2px;
+    background: #fff5f5;
+  }
+  .payment-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gray);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .payment-option.selected .payment-radio {
+    border-color: var(--red);
+  }
+  .payment-option.selected .payment-radio::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+  .payment-icon {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light-gray);
+    border: 1px solid var(--border);
+  }
+  .payment-info h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .payment-info p {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  /* Credit Card Form */
+  .card-form {
+    display: none;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .card-form.active { display: block; }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .form-row.full { grid-template-columns: 1fr; }
+  
+  .form-group-checkout {
+    margin-bottom: 16px;
+  }
+  .form-group-checkout label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    color: var(--black);
+  }
+  .form-group-checkout input {
+    width: 100%;
+    height: 44px;
+    border: 1.5px solid var(--border);
+    padding: 0 14px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group-checkout input:focus {
+    border-color: var(--black);
+  }
+
+  /* PIX Details */
+  .pix-details {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f8f8;
+    border: 1px dashed var(--gray);
+    text-align: center;
+  }
+  .pix-details.active { display: block; }
+  .pix-qr {
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    background: white;
+    border: 2px solid var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+  }
+  .pix-code {
+    background: white;
+    padding: 12px;
+    border: 1px solid var(--border);
+    font-family: monospace;
+    font-size: 11px;
+    word-break: break-all;
+    margin-top: 12px;
+  }
+
+  /* Order Summary */
+  .order-item {
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .order-item:last-child { border: none; }
+  .order-item img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
+  .order-item-info {
+    flex: 1;
+  }
+  .order-item-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .order-item-qty {
+    font-size: 12px;
+    color: var(--gray);
+  }
+  .order-item-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--red);
+  }
+
+  .order-totals {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px solid var(--black);
+  }
+  .order-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .order-total-row.final {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .order-total-row.final .value {
+    color: var(--red);
+  }
+
+  .checkout-btn {
+    width: 100%;
+    height: 54px;
+    background: var(--black);
+    color: white;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 24px;
+  }
+  .checkout-btn:hover { background: var(--red); }
+
+  @media (max-width: 920px) {
+    .checkout-container {
+      grid-template-columns: 1fr;
+    }
+    .checkout-section {
+      box-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">🔒 Pagamento 100% seguro e protegido</div>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="atletic-store.html">
+      <span class="logo-main">Atletic Store</span>
+      <span class="logo-sub">Performance &amp; Estilo</span>
+    </a>
+    <div class="search-wrap">
+      <input type="text" placeholder="Buscar produtos..." />
+    </div>
+    <div class="header-actions">
+      <button class="cart-btn" onclick="window.location.href='atletic-store.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Voltar
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="checkout-page">
+  <div class="checkout-container">
+    
+    <!-- Payment Method Section -->
+    <div class="checkout-section">
+      <h2 class="section-title">Método de <span>Pagamento</span></h2>
+      
+      <div class="payment-methods">
+        
+        <!-- Credit Card -->
+        <div class="payment-option selected" onclick="selectPayment(this, 'card')">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">💳</div>
+          <div class="payment-info">
+            <h4>Cartão de Crédito</h4>
+            <p>Visa, Mastercard, Elo</p>
+          </div>
+        </div>
+
+        <!-- PIX -->
+        <div class="payment-option" onclick="selectPayment(this, 'pix')">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">📱</div>
+          <div class="payment-info">
+            <h4>PIX</h4>
+            <p>Aprovação instantânea</p>
+          </div>
+        </div>
+
+        <!-- Boleto -->
+        <div class="payment-option" onclick="selectPayment(this, 'boleto')">
+          <div class="payment-radio"></div>
+          <div class="payment-icon">📄</div>
+          <div class="payment-info">
+            <h4>Boleto Bancário</h4>
+            <p>Vencimento em 3 dias úteis</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Credit Card Form -->
+      <div class="card-form active" id="cardForm">
+        <div class="form-row full">
+          <div class="form-group-checkout">
+            <label>Número do Cartão</label>
+            <input type="text" placeholder="0000 0000 0000 0000" maxlength="19">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group-checkout">
+            <label>Nome no Cartão</label>
+            <input type="text" placeholder="Como está impresso no cartão">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group-checkout">
+            <label>Validade</label>
+            <input type="text" placeholder="MM/AA" maxlength="5">
+          </div>
+          <div class="form-group-checkout">
+            <label>CVV</label>
+            <input type="text" placeholder="000" maxlength="3">
+          </div>
+        </div>
+      </div>
+
+      <!-- PIX Details -->
+      <div class="pix-details" id="pixDetails">
+        <p style="font-size: 13px; color: var(--gray); margin-bottom: 12px;">
+          Escaneie o QR Code com o app do seu banco
+        </p>
+        <div class="pix-qr">
+          <span>📱</span>
+        </div>
+        <p style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">
+          Ou copie o código PIX
+        </p>
+        <div class="pix-code">
+          00020126360014BR.GOV.BCB.PIX0114+55119876543215204000053039865802BR5925ATLETIC STORE LTDA6009SAO PAULO
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Order Summary Section -->
+    <div class="checkout-section">
+      <h2 class="section-title">Resumo do <span>Pedido</span></h2>
+      
+      <div id="orderItems"></div>
+
+      <div class="order-totals">
+        <div class="order-total-row">
+          <span>Subtotal</span>
+          <span id="subtotal">R$ 0,00</span>
+        </div>
+        <div class="order-total-row">
+          <span>Frete</span>
+          <span style="color: #1a7a3a; font-weight: 700;">GRÁTIS</span>
+        </div>
+        <div class="order-total-row final">
+          <span>Total</span>
+          <span class="value" id="total">R$ 0,00</span>
+        </div>
+      </div>
+
+      <button class="checkout-btn">Finalizar Pedido</button>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <span>© 2026 Atletic Store. Todos os direitos reservados.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="cart.js"></script>
+<script>
+// Select payment method
+function selectPayment(element, type) {
+  document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+  element.classList.add('selected');
+  
+  // Hide all payment details
+  document.getElementById('cardForm').classList.remove('active');
+  document.getElementById('pixDetails').classList.remove('active');
+  
+  // Show selected payment details
+  if (type === 'card') {
+    document.getElementById('cardForm').classList.add('active');
+  } else if (type === 'pix') {
+    document.getElementById('pixDetails').classList.add('active');
+  }
+}
+
+// Load cart items
+function loadCheckoutItems() {
+  const cart = loadCart();
+  const container = document.getElementById('orderItems');
+  
+  if (cart.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:var(--gray);padding:20px;">Carrinho vazio</p>';
+    return;
+  }
+  
+  let html = '';
+  let subtotal = 0;
+  
+  cart.forEach(item => {
+    const price = parseFloat(item.price.replace('R$ ', '').replace(',', '.'));
+    const itemTotal = price * item.quantity;
+    subtotal += itemTotal;
+    
+    html += `
+      <div class="order-item">
+        <img src="${item.image || 'https://via.placeholder.com/70'}" alt="${item.name}">
+        <div class="order-item-info">
+          <div class="order-item-name">${item.name}</div>
+          <div class="order-item-qty">Quantidade: ${item.quantity}</div>
+        </div>
+        <div class="order-item-price">
+          R$ ${itemTotal.toFixed(2).replace('.', ',')}
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  
+  const subtotalFormatted = 'R$ ' + subtotal.toFixed(2).replace('.', ',');
+  document.getElementById('subtotal').textContent = subtotalFormatted;
+  document.getElementById('total').textContent = subtotalFormatted;
+}
+
+loadCheckoutItems();
+</script>
+<script src="accessibility.js"></script>
+
+</body>
+</html>

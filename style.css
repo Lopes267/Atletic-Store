@@ -11,6 +11,17 @@
     --white: #ffffff;
   }
 
+  /* Dark mode overrides */
+  html.dark {
+    --red: #ff6b6b;
+    --red-dark: #ff4b4b;
+    --black: #f5f5f5;
+    --gray: #cfcfcf;
+    --light-gray: #1a1a1a;
+    --border: #2b2b2b;
+    --white: #0b0b0b;
+  }
+
   body {
     font-family: 'Barlow', sans-serif;
     background: var(--white);
@@ -112,6 +123,23 @@
   }
   .search-btn:hover { background: var(--red); }
   .search-btn svg { color: white; }
+
+  /* Dark mode toggle — standalone button in header-actions */
+  .dark-toggle {
+    width: 42px;
+    height: 42px;
+    background: transparent;
+    border: 1.5px solid var(--black);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .dark-toggle:hover { background: var(--light-gray); }
+  html.dark .dark-toggle:hover { background: rgba(255,255,255,0.08); }
+  .dark-toggle svg { color: var(--black); width: 18px; height: 18px; }
 
   /* ── CART ── */
   .header-actions {
@@ -422,6 +450,35 @@
     display: flex;
     align-items: center;
     justify-content: center;
+      position: relative;
+    }
+
+    /* per-image toggle button (top-right) */
+    .img-toggle-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: background 0.15s, transform 0.12s;
+      z-index: 5;
+    }
+    .img-toggle-btn:hover { transform: translateY(-2px); }
+    html.dark .img-toggle-btn { background: rgba(0,0,0,0.45); border-color: rgba(255,255,255,0.06); }
+    .img-toggle-btn svg { width: 16px; height: 16px; color: var(--black); }
+    html.dark .img-toggle-btn svg { color: var(--white); }
+
+    /* fallback filter applied when no dark png variant */
+    .img-dark-filter {
+      filter: brightness(0.75) contrast(1.05) saturate(0.9);
+    }
     font-size: 72px;
     position: relative;
     overflow: hidden;
@@ -1004,3 +1061,111 @@
   text-decoration: none;
 }
 .user-nav-btn:hover { background: var(--light-gray); }
+
+/* ══════════════════════════════════════════════════════
+   DARK MODE — correções de legibilidade
+   Problema: var(--black) inverte para claro em dark mode,
+   quebrando elementos com color:white hardcoded sobre fundo var(--black).
+   ══════════════════════════════════════════════════════ */
+
+/* Topbar, header, nav — mantém fundo escuro real */
+html.dark .topbar {
+  background: #111;
+  color: #e8e8e8;
+}
+html.dark header {
+  background: #161616;
+  border-bottom-color: #2a2a2a;
+}
+html.dark nav {
+  background: #161616;
+  border-bottom-color: #2a2a2a;
+}
+
+/* Hero — mantém fundo escuro, texto branco legível */
+html.dark .hero {
+  background: #0d0d0d;
+}
+
+/* Footer — mantém fundo muito escuro */
+html.dark footer {
+  background: #080808;
+}
+
+/* Barra de busca */
+html.dark .search-wrap input {
+  background: #1e1e1e;
+  color: #f0f0f0;
+  border-color: #3a3a3a;
+}
+html.dark .search-wrap input::placeholder { color: #666; }
+html.dark .search-wrap input:focus { border-color: var(--red); }
+html.dark .search-btn {
+  background: #e0e0e0;
+}
+html.dark .search-btn svg { color: #111; }
+html.dark .search-btn:hover { background: var(--red); }
+html.dark .search-btn:hover svg { color: white; }
+
+/* Botão adicionar ao carrinho */
+html.dark .add-btn {
+  background: #d8d8d8;
+  color: #111;
+}
+html.dark .add-btn:hover {
+  background: var(--red);
+  color: white;
+}
+
+/* Badge NOVO (fundo preto vira claro → texto branco some) */
+html.dark .badge-new {
+  background: #d8d8d8;
+  color: #111;
+}
+
+/* Botão usuário logado */
+html.dark .user-btn {
+  background: #252525;
+  color: #f0f0f0;
+}
+html.dark .user-btn:hover { background: var(--red); }
+
+/* Botão login/cadastro no header */
+html.dark .login-btn-header {
+  color: #f0f0f0;
+  border-color: #f0f0f0;
+}
+html.dark .login-btn-header:hover {
+  background: #f0f0f0;
+  color: #111;
+}
+
+/* Dropdown de usuário */
+html.dark .user-dropdown {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+  box-shadow: 4px 4px 0 #333;
+}
+html.dark .user-info-name { color: #f0f0f0; }
+html.dark .user-info-email { color: #888; }
+html.dark .user-dropdown-divider { background: #2b2b2b; }
+html.dark .user-nav-btn:hover,
+html.dark .user-logout-btn:hover { background: #252525; }
+
+/* Modal do carrinho */
+html.dark .cart-content {
+  background: #1a1a1a;
+  color: #f0f0f0;
+}
+html.dark .cart-header { border-color: #2b2b2b; }
+html.dark .cart-footer { border-color: #2b2b2b; }
+html.dark .cart-item { border-color: #2b2b2b; }
+html.dark .cart-close { color: #888; }
+html.dark .empty-cart { color: #888; }
+html.dark .cart-item-name { color: #f0f0f0; }
+
+/* Botão dark toggle — ícone visível em ambos os modos */
+html.dark .dark-toggle {
+  border-color: #3a3a3a;
+}
+html.dark .dark-toggle svg { color: #f0f0f0; }
